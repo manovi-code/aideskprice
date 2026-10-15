@@ -1,0 +1,66 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><link rel="icon" href="data:,"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AIDeskPrice — What AI in IT helpdesk software really costs</title>
+<meta name="description" content="Neutral, sourced comparison of AI pricing across ITSM and IT helpdesk tools, with a cost calculator.">
+<style>
+:root{--b:#0f172a;--m:#64748b;--a:#2563eb;--l:#e2e8f0;--bg:#f8fafc}
+*{box-sizing:border-box}body{margin:0;font:15px/1.5 system-ui,sans-serif;color:var(--b);background:var(--bg)}
+header,section,footer{max-width:1100px;margin:auto;padding:16px}
+header h1{margin:.2em 0}nav a{margin-right:12px;color:var(--a)}
+.card{background:#fff;border:1px solid var(--l);border-radius:10px;padding:16px;margin:12px 0}
+table{width:100%;border-collapse:collapse;font-size:14px}th,td{padding:8px;border-bottom:1px solid var(--l);text-align:left;vertical-align:top}
+th{cursor:pointer;background:#f1f5f9;position:sticky;top:0}th.s::after{content:" ↕";color:var(--m)}
+.wrap{overflow-x:auto}.tag{font-size:12px;padding:2px 6px;border-radius:6px;background:#fef3c7}.pub{background:#dcfce7}
+input,select,button{font:inherit;padding:6px 8px;border:1px solid var(--l);border-radius:6px}button{background:var(--a);color:#fff;border:0;cursor:pointer}
+.row{display:flex;flex-wrap:wrap;gap:12px;align-items:end}.row label{display:flex;flex-direction:column;font-size:13px;color:var(--m)}
+.muted{color:var(--m);font-size:13px}.todo{border:2px dashed #f59e0b}
+</style></head><body>
+<header><h1>AIDeskPrice</h1><p>What AI features in IT helpdesk / ITSM software actually cost. Every number links to the vendor's own pricing page.</p>
+<nav><a href="#compare">Compare</a><a href="#calc">Calculator</a><a href="#vendors">Vendors</a><a href="#changes">Pricing changes</a><a href="#newsletter">Newsletter</a><a href="#sponsor">Sponsor</a></nav></header>
+
+<section id="compare"><h2>Comparison</h2>
+<div class="row"><label>Search<input id="q" placeholder="vendor, model…"></label>
+<label>Show<select id="f"><option value="all">All</option><option value="pub">Public pricing</option><option value="quote">Quote only</option></select></label></div>
+<div class="card wrap"><table id="t"><thead><tr><th class="s" data-k="name">Vendor</th><th class="s" data-k="model">Pricing model</th><th>Tiers</th><th>AI included where</th><th>AI add-on</th><th>Per-resolution</th><th>Source</th></tr></thead><tbody></tbody></table></div>
+<p class="muted" id="checked"></p></section>
+
+<section id="calc"><h2>AI cost calculator</h2><div class="card">
+<div class="row"><label>Agents / technicians<input id="ag" type="number" min="1" value="15"></label>
+<label>Tickets per month<input id="tk" type="number" min="0" value="2000"></label>
+<label>% resolved by AI<input id="dr" type="number" min="0" max="100" value="20"></label></div>
+<p class="muted">Estimate = agents × AI-capable tier price + agents × AI add-on + (AI-resolved tickets above any included allowance) × per-resolution rate. Currencies are not converted. Excludes taxes, implementation, assets, discounts. Rough guide only.</p>
+<div class="wrap"><table id="ct"><thead><tr><th>Vendor</th><th>Est. monthly</th><th>Assumptions</th></tr></thead><tbody></tbody></table></div></div></section>
+
+<section id="vendors"><h2>Vendor details</h2><div id="vd"></div></section>
+<section id="changes"><h2>Pricing changes log</h2><div class="card"><ul id="cl"></ul></div></section>
+
+<section id="newsletter"><h2>Weekly pricing-change newsletter</h2><div class="card todo">
+<!-- TODO: connect to a newsletter provider (e.g. Buttondown/Beehiiv free tier). Form currently submits nowhere. -->
+<form onsubmit="event.preventDefault();this.querySelector('p').textContent='Signup not live yet — coming soon.'">
+<div class="row"><label>Email<input type="email" required placeholder="you@company.com"></label><button>Subscribe</button></div><p class="muted">TODO: not connected yet. No data is stored.</p></form></div></section>
+
+<section id="sponsor"><h2>Sponsor / featured listing</h2><div class="card todo"><p>Vendors: featured placements and newsletter sponsorships will be clearly labeled “Sponsored” and never change the data or ranking.</p>
+<p class="muted">TODO: add contact email (e.g. a dedicated address) here.</p></div></section>
+
+<footer class="muted"><p><b>Disclaimer:</b> AIDeskPrice is independent and not affiliated with any vendor. Prices are taken from public vendor pages on the date shown and may change, vary by region, team size, or contract. Always confirm with the vendor. Corrections welcome. Some links may become affiliate links; this will be disclosed.</p></footer>
+
+<script>
+let D,sortK='name',asc=true;const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const sym=c=>c==='GBP'?'£':'$';
+function table(){const q=$('#q').value.toLowerCase(),f=$('#f').value;
+ let v=D.vendors.filter(x=>(f==='all'||(f==='pub')===x.public)&&JSON.stringify(x).toLowerCase().includes(q));
+ v.sort((a,b)=>(a[sortK]>b[sortK]?1:-1)*(asc?1:-1));
+ $('#t tbody').innerHTML=v.map(x=>`<tr><td><a href="#v-${x.id}">${esc(x.name)}</a></td><td><span class="tag ${x.public?'pub':''}">${esc(x.model)}</span></td><td>${esc(x.tiers)}</td><td>${esc(x.aiTier)}</td><td>${esc(x.aiAddon)}</td><td>${esc(x.perResolution)}</td><td><a href="${esc(x.source)}" target="_blank" rel="noopener">vendor page</a><br><span class="muted">checked ${D.checked}</span></td></tr>`).join('');}
+function calc(){const ag=+$('#ag').value||0,tk=+$('#tk').value||0,ai=tk*(+$('#dr').value||0)/100;
+ const rows=D.vendors.map(x=>{const c=x.calc;if(!c)return{x,t:null};
+  if(c.flat!=null)return{x,t:c.flat};const inc=(c.includedFlat||0)+(c.includedPerAgent||0)*ag;
+  return{x,t:ag*(c.seat||0)+ag*(c.addon||0)+Math.max(0,ai-inc)*(c.rate||0)};});
+ rows.sort((a,b)=>(a.t??1e12)-(b.t??1e12));
+ $('#ct tbody').innerHTML=rows.map(r=>`<tr><td>${esc(r.x.name)}</td><td>${r.t==null?'<span class="tag">Quote only</span>':sym(r.x.currency)+Math.round(r.t).toLocaleString()+(r.x.currency==='GBP'?' (GBP)':'')}</td><td class="muted">${esc(r.x.calc?.note||'No public price')}</td></tr>`).join('');}
+fetch('data/vendors.json').then(r=>r.json()).then(d=>{D=d;$('#checked').textContent='All prices checked '+d.checked+'. Quote only = vendor does not publish prices.';
+ $('#vd').innerHTML=d.vendors.map(x=>`<div class="card" id="v-${x.id}"><h3>${esc(x.name)} ${x.public?'':'<span class="tag">Quote only</span>'}</h3><p><b>Model:</b> ${esc(x.model)}<br><b>Tiers:</b> ${esc(x.tiers)}<br><b>AI:</b> ${esc(x.aiTier)}<br><b>AI add-on:</b> ${esc(x.aiAddon)}<br><b>Per-resolution:</b> ${esc(x.perResolution)}</p><p class="muted">Source: <a href="${esc(x.source)}" target="_blank" rel="noopener">${esc(x.source)}</a> · checked ${d.checked}</p></div>`).join('');
+ $('#cl').innerHTML=d.changes.map(c=>`<li><b>${esc(c.date)}</b> — ${esc(c.vendor)}: ${esc(c.text)}</li>`).join('');
+ table();calc();}).catch(e=>{document.body.insertAdjacentHTML('afterbegin','<p style="color:red">Could not load data/vendors.json (open via a web server, not file://).</p>');});
+['#q','#f'].forEach(s=>$(s).addEventListener('input',table));['#ag','#tk','#dr'].forEach(s=>$(s).addEventListener('input',calc));
+document.querySelectorAll('th.s').forEach(th=>th.onclick=()=>{asc=sortK===th.dataset.k?!asc:true;sortK=th.dataset.k;table();});
+</script></body></html>
